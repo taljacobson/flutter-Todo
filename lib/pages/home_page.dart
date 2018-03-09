@@ -57,16 +57,18 @@ class HomePageState extends State<HomePage> {
       body: new Container(
         child: new Column(
           children: <Widget>[
+            new TodoList(
+              todos: todos,
+              onTap: toggleTodo,
+              onLongPress: delTodo
+            ),
+            new Divider(height: 11.0),
             new Center(
               child: new Padding(
                 padding: new EdgeInsets.symmetric(horizontal: 10.0),
                 child: new FormInput((str) => _handleInput(str)),
               ),
             ),
-            new Divider(height: 11.0),
-            new TodoList(todos, (int index) => toggleTodo(index),
-                (int index) => delTodo(index)),
-
           ],
         ),
       ),

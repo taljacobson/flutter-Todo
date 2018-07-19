@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 
 class FormInput extends StatefulWidget {
   final ValueChanged<String> onChange;
-  FormInput(this.onChange);
+  FormInput({this.onChange});
 
   @override
   State<StatefulWidget> createState() => new FormInputState();

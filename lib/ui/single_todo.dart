@@ -4,9 +4,10 @@ import '../utils/todos.dart';
 class SingleTodo extends StatefulWidget {
   final Todo todo;
   final int index;
-  final ValueChanged<int> onTap;
-  final ValueChanged<int> onLongPress;
-  SingleTodo({this.todo, this.index, this.onTap, this.onLongPress});
+  final Function(Todo todo) onTap;
+  final Function(Todo todo) onLongPress;
+  SingleTodo({Key key, this.todo, this.index, this.onTap, this.onLongPress})
+      : super(key: key);
 
   @override
   _SingleTodoState createState() => new _SingleTodoState();
@@ -18,54 +19,59 @@ class _SingleTodoState extends State<SingleTodo>
 
   @override
   void initState() {
-    super.initState();
     _controller = new AnimationController(
-        duration: new Duration(milliseconds: 800), vsync: this);
-    
+        duration: new Duration(milliseconds: 800), vsync: this)
+      ..addListener(animationListener);
+
     this.setState(() {
       _controller.forward();
     });
+
+    super.initState();
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller?.removeListener(animationListener);
+    _controller?.dispose();
     super.dispose();
   }
 
-  void del() {
-    this.setState(() {
-      _controller.reverse().whenComplete(() {
-        
-        widget.onLongPress(widget.index);
-      });
-    });
+  @override
+  void deactivate() async {
+    super.deactivate();
   }
 
+  del() async {
+    await _controller.reverse();
+    widget.onLongPress(widget.todo);
+  }
 
   @override
   Widget build(BuildContext context) {
-    
-    return new SizeTransition(
-      sizeFactor: new CurvedAnimation(
+    return SizeTransition(
+      sizeFactor: CurvedAnimation(
           reverseCurve: Curves.fastOutSlowIn,
-            parent: _controller, curve: Curves.easeIn),
-      child: new InkWell(
-        onTap: () => widget.onTap(widget.index),
+          parent: _controller,
+          curve: Curves.easeIn),
+      child: InkWell(
+        onTap: () => widget.onTap(widget.todo),
         onLongPress: del,
-        child: new Container(
-          color: _controller.status == AnimationStatus.reverse ? Colors.red[50] :Colors.transparent,
+        child: Container(
+          color: _controller.status == AnimationStatus.reverse
+              ? Colors.red[50]
+              : Colors.transparent,
           //modified
           margin: const EdgeInsets.symmetric(vertical: 1.0),
-          child: new Row(
+          child: Row(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              new Container(
+              Container(
                 margin: const EdgeInsets.only(right: 16.0),
-                child: new IconButton(
-                  onPressed: () => widget.onTap(widget.index),
-                  icon: new Icon(widget.todo.completed
+                child: IconButton(
+                  onPressed: () => widget.onTap(widget.todo),
+                  icon: Icon(widget.todo.completed
                       ? Icons.check_box
                       : Icons.check_box_outline_blank),
                   color: widget.todo.completed
@@ -74,9 +80,9 @@ class _SingleTodoState extends State<SingleTodo>
                 ),
               ),
               new Expanded(
-                child: new Text(
+                child: Text(
                   widget.todo.todo,
-                  style: new TextStyle(
+                  style: TextStyle(
                     decoration: widget.todo.completed
                         ? TextDecoration.lineThrough
                         : TextDecoration.none,
@@ -88,5 +94,9 @@ class _SingleTodoState extends State<SingleTodo>
         ),
       ),
     );
+  }
+
+  void animationListener() {
+    setState(() {});
   }
 }

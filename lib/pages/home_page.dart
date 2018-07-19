@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import '../utils/todos.dart';
+
 import '../ui/FormInput.dart';
 import '../ui/todo_list.dart';
+import '../utils/todos.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -12,61 +13,38 @@ class HomePageState extends State<HomePage> {
   List<Todo> todos;
 
   @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    var newtodos = [
-      new Todo('make bread'),
-      new Todo('drink milk'),
-    ];
-
-    setState(() {
-      todos = newtodos;
-    });
-  }
-
-  _handleInput(String str) {
-    if (str.length < 4) return;
-    setState(() {
-      todos.add(new Todo(str));
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text('Todo'),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Todo'),
         actions: <Widget>[
-          new MaterialButton(
-            
+          MaterialButton(
             textColor: Colors.white,
             onPressed: removeCompleted,
-
-              padding: new EdgeInsets.symmetric(horizontal: 10.0),
-              child: new Text(
-                todos.where((test) => test.completed).length.toString(),
-                style:
-                    new TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
-              ),
-
+            padding: EdgeInsets.symmetric(horizontal: 10.0),
+            child: Text(
+              todos.where((test) => test.completed).length.toString(),
+              style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
-      body: new Container(
-        child: new Column(
+      body: Container(
+        child: Column(
           children: <Widget>[
-            new TodoList(
+            TodoList(
               todos: todos,
               onTap: toggleTodo,
-              onLongPress: delTodo
+              onLongPress: delTodo,
             ),
-            new Divider(height: 11.0),
-            new Center(
-              child: new Padding(
-                padding: new EdgeInsets.symmetric(horizontal: 10.0),
-                child: new FormInput((str) => _handleInput(str)),
+            Divider(height: 11.0),
+            Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 10.0),
+                child: FormInput(
+                  onChange: (str) => _handleInput(str),
+                ),
               ),
             ),
           ],
@@ -75,23 +53,43 @@ class HomePageState extends State<HomePage> {
     );
   }
 
-  void toggleTodo(int index) {
+  void delTodo(Todo todo) {
     setState(() {
-      todos[index].toggle();
+      todos.removeWhere((test) => test.todo == todo.todo);
     });
   }
 
-  void delTodo(int index) {
+  @override
+  void initState() {
+    // TODO: implement initState
+
+    var newtodos = [
+      new Todo('make bread'),
+      new Todo('drink milk'),
+    ];
+
     setState(() {
-      todos.removeAt(index);
+      todos = newtodos;
     });
+    super.initState();
   }
 
   void removeCompleted() {
-    List<Todo> newTodo = todos.where((todo) => !todo.completed).toList();
-
     setState(() {
-      todos = newTodo;
+      todos.removeWhere((todo) => todo.completed);
+    });
+  }
+
+  void toggleTodo(Todo todo) {
+    setState(() {
+      todos.singleWhere((t) => t == todo).toggle();
+    });
+  }
+
+  _handleInput(String str) {
+    if (str.length < 4) return;
+    setState(() {
+      todos.add(new Todo(str));
     });
   }
 }
